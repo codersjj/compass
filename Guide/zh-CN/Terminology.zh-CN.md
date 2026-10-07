@@ -18,6 +18,8 @@
 | Create | 创作 | 写作与内容流程 |
 | Library | 资料库 | 阅读、书籍及来源笔记 |
 | Brain | 大脑图谱 | Life OS 中的笔记关联图 |
+| Note labels (graph) | 笔记名称 | 图谱中显示的笔记名称，区别于 `#` 标签 |
+| Tag | 标签 | 笔记或任务中的 `#` 标签 |
 | Capture | 记录 | 使用既有路由添加记录或创建笔记 |
 | Journal | 日记 | 正文仍使用 `## Journal` 标题 |
 | Daily Questions | 每日问题 | 以 1 到 10 分评价自己的努力 |
@@ -29,11 +31,12 @@
 | Life Theme | 生活主题 | 长期方向的简短表述 |
 | Core Values | 核心价值观 | 规划的价值基础 |
 | Ideal Week | 理想的一周 | 一周时间安排的参考结构 |
-| Commitment | 待办事项 | 应用中索引到的开放任务 |
+| Commitment | 待办事项 | 需要投入精力的事项；在任务列表中指未完成任务 |
 | Kanban Board | 看板 | 由列和卡片组织的流程 |
+| Newsletter | 电子简报 | 面向订阅者的写作与发布类型 |
 | Frontmatter | 文首属性 | Markdown 顶部的 YAML 数据 |
 | Sample / Example | 示例 | 展示用数据，不是真实个人记录 |
-| Development Candidate | 开发候选版 | 等待打包与原生验收的开发产物 |
+| Development Candidate | 开发候选版 | 用于开发验证，尚未通过全部发布验收的产物 |
 | Native Acceptance | 原生验收 | 在实际 Obsidian 环境内验证工作流 |
 | Prompt | 提示词 | 供 AI 代理执行的工作流指令 |
 | Assistant | 助手 | 可选的 AI 工作流入口 |

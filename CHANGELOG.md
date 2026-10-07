@@ -5,6 +5,7 @@ Format: Added, Changed, Templates (manual merge notes), Plugins, Breaking. Semve
 ## Unreleased
 
 ### Simplified Chinese support
+- Review all 411 Chinese interface messages and four Chinese onboarding documents against their English source and rendering context. Correct newsletter and graph-label terminology, task and board count descriptions, authorization wording, and instructions for customizing existing questions without replacing their keys.
 - Add a Chinese README, quick-start guide, configuration/localization guide, and bilingual terminology glossary, with links back to the canonical English documentation.
 - Add an English/Simplified Chinese language selector to the Life OS top bar with persisted selection and English fallback. Language changes affect application text while canonical paths, properties, commands, and user content remain unchanged. Existing Markdown dashboards, templates, and AI prompts retain their current language.
 - Document safe translation of daily question text without renaming existing property keys, and distinguish personal configuration from clean build defaults. Native Obsidian acceptance remains required before release.
