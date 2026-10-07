@@ -4,6 +4,11 @@ Format: Added, Changed, Templates (manual merge notes), Plugins, Breaking. Semve
 
 ## Unreleased
 
+### Simplified Chinese support
+- Add a Chinese README, quick-start guide, configuration/localization guide, and bilingual terminology glossary, with links back to the canonical English documentation.
+- Add an English/Simplified Chinese language selector to the Life OS top bar with persisted selection and English fallback. Language changes affect application text while canonical paths, properties, commands, and user content remain unchanged. Existing Markdown dashboards, templates, and AI prompts retain their current language.
+- Document safe translation of daily question text without renaming existing property keys, and distinguish personal configuration from clean build defaults. Native Obsidian acceptance remains required before release.
+
 ### Release preparation hardening
 - Skip live personal defaults before staging; rebuild canonical boards empty instead of copying live cards; remove the arbitrary Board.md exemption; reset core machine state and omit local agent directories.
 - Add disposable archive restore verification with checksum, traversal, duplicate-path, file-type, inventory, and per-file integrity checks. Eleven release-safety tests cover core rejection paths.
