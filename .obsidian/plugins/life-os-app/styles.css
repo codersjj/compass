@@ -281,6 +281,17 @@
   gap: 7px;
 }
 
+.life-os-language-select {
+  min-height: 34px;
+  max-width: 112px;
+  padding: 5px 8px;
+  color: var(--text-normal);
+  border: 1px solid var(--life-os-line);
+  border-radius: 9px;
+  background: var(--background-secondary);
+  font-size: 0.76rem;
+}
+
 .life-os-topbar-button {
   display: inline-flex;
   align-items: center;
