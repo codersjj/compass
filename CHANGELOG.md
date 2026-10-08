@@ -5,6 +5,7 @@ Format: Added, Changed, Templates (manual merge notes), Plugins, Breaking. Semve
 ## Unreleased
 
 ### Simplified Chinese support
+- Keep the language selector and toolbar controls visible in narrow Obsidian panes inside wide windows, and stack the embedded Brain details below its drawing area. Browser checks cover 390px panes in both languages while allowing the navigation rail to scroll within its own container.
 - Review all 411 Chinese interface messages and four Chinese onboarding documents against their English source and rendering context. Correct newsletter and graph-label terminology, task and board count descriptions, authorization wording, and instructions for customizing existing questions without replacing their keys.
 - Add a Chinese README, quick-start guide, configuration/localization guide, and bilingual terminology glossary, with links back to the canonical English documentation.
 - Add an English/Simplified Chinese language selector to the Life OS top bar with persisted selection and English fallback. Language changes affect application text while canonical paths, properties, commands, and user content remain unchanged. Existing Markdown dashboards, templates, and AI prompts retain their current language.

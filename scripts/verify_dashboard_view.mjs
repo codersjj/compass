@@ -247,7 +247,87 @@ try {
   await page.getByRole('combobox',{name:await page.evaluate(()=>window.plugin.t('Life OS language'))}).selectOption('en');
   await page.getByRole('button',{name:'Home',exact:true}).waitFor();
   assert.equal(await page.evaluate(()=>window.savedLanguages.at(-1).language),'en');
+
+  // Obsidian panes can be narrow inside a wide application window. Testing only
+  // the viewport's width would exercise media queries and miss this regression.
+  await page.evaluate(()=>{
+    const root=document.querySelector('#root');
+    root.style.width='390px';root.style.marginInlineStart='auto';
+    document.querySelector('[role="note"]').style.right='0';
+  });
+  for(const locale of ['en','zh-CN']){
+    const languageLabel=await page.evaluate(()=>window.plugin.t('Life OS language'));
+    await page.getByRole('combobox',{name:languageLabel,exact:true}).selectOption(locale);
+    assert.equal(await page.evaluate(()=>window.plugin.language),locale);
+    for(const screen of ['home','today','plan','review','focus','projects','people','create','library','ai']){
+      await page.evaluate(s=>{window.view.activeScreen=s;window.view.render();},screen);
+      const layout=await page.evaluate(()=>{
+        const root=document.querySelector('#root');root.scrollTop=0;root.scrollLeft=0;
+        // Preserve native setIcon's SVG footprint in this otherwise iconless stub.
+        for(const button of document.querySelectorAll('.life-os-topbar-button')){
+          const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+          svg.setAttribute('width','24');svg.setAttribute('height','24');
+          button.firstElementChild.replaceChildren(svg);
+        }
+        const bounds=root.getBoundingClientRect();
+        const controls=[...document.querySelectorAll('.life-os-language-select,.life-os-topbar-button,.life-os-display-options > summary')];
+        const nav=document.querySelector('.life-os-nav');
+        return {
+          viewport:innerWidth,width:bounds.width,clientWidth:root.clientWidth,scrollWidth:root.scrollWidth,
+          documentOverflow:document.documentElement.scrollWidth>innerWidth,
+          controls:controls.map(control=>{
+            const rect=control.getBoundingClientRect();
+            return {label:control.getAttribute('aria-label')||control.textContent.trim(),visible:rect.width>0&&rect.height>0&&rect.left>=bounds.left-1&&rect.right<=bounds.right+1&&rect.top>=bounds.top&&rect.bottom<=bounds.bottom};
+          }),
+          navScrolls:nav.scrollWidth>nav.clientWidth,
+          navOverflow:getComputedStyle(nav).overflowX,
+        };
+      });
+      assert.equal(layout.viewport,1440);
+      assert.equal(layout.width,390);
+      assert.equal(layout.documentOverflow,false,`${locale} ${screen} wide-window document overflow`);
+      assert.ok(layout.scrollWidth<=layout.clientWidth+1,`${locale} ${screen} outer pane overflow: ${layout.scrollWidth}/${layout.clientWidth}`);
+      assert.equal(layout.controls.length,5);
+      assert.ok(layout.controls.every(control=>control.visible),`${locale} ${screen} clipped toolbar controls: ${JSON.stringify(layout.controls)}`);
+      assert.ok(!layout.navScrolls||['auto','scroll'].includes(layout.navOverflow),`${locale} ${screen} navigation must scroll within its own container`);
+    }
+    const brainLabel=await page.evaluate(()=>window.plugin.t('Brain'));
+    await page.getByRole('button',{name:brainLabel,exact:true}).click();
+    const graph=await page.evaluate(()=>{
+      const root=document.querySelector('#root');
+      const body=document.querySelector('.life-os-brain-embedded .life-os-brain-body');
+      const stage=body.querySelector('.life-os-brain-stage').getBoundingClientRect();
+      const canvas=body.querySelector('canvas').getBoundingClientRect();
+      const panel=body.querySelector('.life-os-brain-panel').getBoundingClientRect();
+      return {paneWidth:root.clientWidth,scrollWidth:root.scrollWidth,direction:getComputedStyle(body).flexDirection,stageWidth:stage.width,stageHeight:stage.height,canvasWidth:canvas.width,canvasHeight:canvas.height,panelWidth:panel.width,stageBottom:stage.bottom,panelTop:panel.top};
+    });
+    assert.ok(graph.scrollWidth<=graph.paneWidth+1,`${locale} embedded Brain outer pane overflow`);
+    assert.ok(graph.stageWidth>=300&&graph.canvasWidth>=300,`${locale} embedded Brain drawing area is squeezed: ${JSON.stringify(graph)}`);
+    assert.ok(graph.stageHeight>=360&&graph.canvasHeight>=360,`${locale} embedded Brain drawing area is too short`);
+    assert.equal(graph.direction,'column',`${locale} embedded Brain panel must stack below the canvas`);
+    assert.ok(Math.abs(graph.panelWidth-graph.stageWidth)<=1&&Math.abs(graph.stageWidth-graph.paneWidth)<=1,`${locale} embedded Brain panel and canvas must use the pane width`);
+    assert.ok(graph.panelTop>=graph.stageBottom-1,`${locale} embedded Brain panel must not occupy the canvas's side`);
+    await page.locator('.life-os-brain-embedded canvas').press('ArrowRight');
+    assert.ok(await page.evaluate(()=>window.view.embeddedBrain.yaw>0.28));
+    await page.locator('#root').screenshot({path:screenshotPath(`life-os-brain-${locale}-390-pane-wide-window.png`)});
+    const labels=await page.evaluate(()=>Object.fromEntries(['Search','Configure','Capture'].map(key=>[key,window.plugin.t(key)])));
+    await page.getByRole('button',{name:labels.Search,exact:true}).click();
+    assert.equal(await page.evaluate(()=>window.commands.at(-1)),'global-search:open');
+    await page.getByRole('button',{name:labels.Configure,exact:true}).click();
+    assert.equal(await page.evaluate(()=>window.opened.at(-1).path),'Meta/Compass Config.md');
+    await page.getByRole('button',{name:labels.Capture,exact:true}).click();
+    assert.equal(await page.evaluate(()=>window.commands.at(-1)),'capture');
+    await page.locator('.life-os-display-options summary').click();
+    assert.equal(await page.locator('.life-os-display-options').evaluate(element=>element.open),true);
+    await page.locator('.life-os-display-options summary').click();
+    await page.evaluate(()=>{window.view.activeScreen='home';window.view.render();});
+    await page.locator('#root').screenshot({path:screenshotPath(`life-os-${locale}-390-pane-wide-window.png`)});
+  }
+  await page.evaluate(()=>{
+    const root=document.querySelector('#root');root.style.width='';root.style.marginInlineStart='';
+    document.querySelector('[role="note"]').style.right='';
+  });
   assert.deepEqual(errors,[]);
   await page.evaluate(()=>window.view.onClose());
-  console.log('Dashboard browser checks passed: ten modules in English and Chinese, language persistence, preserved user titles and routing, localized Brain accessibility, Home spacing, preview/full Brain navigation, workload groups, project counts, discussion links, board previews, Library filters and remote-cover rejection, AI branches, per-module controls, narrow widths and light-theme smoke check. Synthetic fixture only.');
+  console.log('Dashboard browser checks passed: ten modules in English and Chinese, language persistence, preserved user titles and routing, localized Brain accessibility, Home spacing, preview/full Brain navigation, workload groups, project counts, discussion links, board previews, Library filters and remote-cover rejection, AI branches, per-module controls, narrow viewports and 390px panes in a wide window, visible and usable toolbar controls, full-width embedded Brain with details below its drawing area, and light-theme smoke check. Synthetic fixture only.');
 }finally{await browser.close();}
